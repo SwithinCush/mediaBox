@@ -1,1 +1,30 @@
-#! /usr/bin/env bash
+#! /bin/env bash
+
+# Check if user is root user
+if [[ "$EUID" -ne 0 ]]
+then
+  echo 'Please run as root'
+  exit 1
+else
+  echo 'User has root privelges.'
+fi
+
+# Check if /etc/mediaBox exists
+if [[ -d /etc/mediaBox ]]
+then
+  echo 'mediaBox is already installed. Run /etc/mediaBox/install instead'
+  exit 1
+else
+  echo 'Fresh install.'
+fi
+
+# Update and install git if needed
+apt update
+apt intall git
+
+# Clone in source code
+git clone https://github.com/SwithinCush/mediaBox.git /etc/mediaBox
+chmod 777 /etc/mediaBox/install
+
+# Chain execute to installer
+/etc/mediaBox/install
