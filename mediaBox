@@ -1,1 +1,49 @@
-#! /usr/bin/bash
+#! /bin/bash
+
+# Make sure only root can run our script
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+
+. .env
+
+export pid=$(id -u ${mediaBox_user})
+export gid=$(id -g ${mediaBox_user})
+export tz=$(cat /etc/timezone)
+
+# Start the service FOO
+start() {
+		echo "Starting MediaBox ... "
+        docker-compose up -d
+        echo "Starting MediaBox ... done."
+}
+
+# Restart the service FOO
+stop() {
+        echo "Stopping MediaBox ... "
+		docker-compose down
+        echo "Stopping MediaBox ... done."
+}
+
+### main logic ###
+case "$1" in
+  up)
+        start
+        ;;
+  down)
+        stop
+        ;;
+  restart|reload)
+        stop
+        start
+        ;;
+  defaults)
+        cp -r /etc/mediaBox/config/* ${mediaBox_config}
+        ;;
+  *)
+        echo $"Usage: $0 {up|down|restart|reload|defaults}"
+        exit 1
+esac
+
+exit 0
