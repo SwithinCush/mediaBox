@@ -38,11 +38,11 @@ case "$1" in
         stop
         start
         ;;
-  defaults)
+  provision)
         cp -r /etc/mediaBox/config/* ${mediaBox_config}
         ;;
   *)
-        echo $"Usage: $0 {up|down|restart|reload|defaults}"
+        echo $"Usage: $0 {up|down|restart|reload|provision}"
         exit 1
 esac
 
