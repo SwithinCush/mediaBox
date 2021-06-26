@@ -1,2 +1,235 @@
-# ======== mediaBox ========
+#                     _ _       ____            
+#  _ __ ___   ___  __| (_) __ _| __ )  _____  __
+# | '_ ` _ \ / _ \/ _` | |/ _` |  _ \ / _ \ \/ /
+# | | | | | |  __/ (_| | | (_| | |_) | (_) >  < 
+# |_| |_| |_|\___|\__,_|_|\__,_|____/ \___/_/\_\
+#
+# http://www.patorjk.com/software/taag/#p=display&f=Standard&t=mediaBox
 version: "3"
+
+services:
+#    _            _        _   _   
+#   (_) __ _  ___| | _____| |_| |_ 
+#   | |/ _` |/ __| |/ / _ \ __| __|
+#   | | (_| | (__|   <  __/ |_| |_ 
+#  _/ |\__,_|\___|_|\_\___|\__|\__|
+# |__/                             
+#
+# http://www.patorjk.com/software/taag/#p=display&f=Standard&t=jackett
+  mediaBox_jackett:
+    container_name: mediaBox_jackett
+    hostname: mediaBox_jackett
+    image: linuxserver/jackett
+    environment:
+      - PUID=${pid}
+      - PGID=${gid}
+      - TZ=${tz}
+    ports:
+      - 9117:9117
+    volumes:
+      - ${mediaBox_config}/jackett:/config
+      - ${mediaBox_downloads}:/downloads
+
+#                  _     _ 
+#   ___  _ __ ___ | |__ (_)
+#  / _ \| '_ ` _ \| '_ \| |
+# | (_) | | | | | | |_) | |
+#  \___/|_| |_| |_|_.__/|_|
+#
+#
+# http://www.patorjk.com/software/taag/#p=display&f=Standard&t=ombi                          
+  mediaBox_ombi:
+    container_name: mediaBox_ombi
+    hostname: mediaBox_ombi
+    restart: unless-stopped
+    image: linuxserver/ombi
+    environment:
+      - PUID=${pid}
+      - PGID=${gid}
+      - TZ=${tz}
+    ports:
+      - 3579:3579
+    volumes:
+      - ${mediaBox_config}/ombi:/config
+      
+#                              _          
+#   ___  _ __ __ _  __ _ _ __ (_)_____ __ 
+#  / _ \| '__/ _` |/ _` | '_ \| |_  / '__|
+# | (_) | | | (_| | (_| | | | | |/ /| |   
+#  \___/|_|  \__, |\__,_|_| |_|_/___|_|   
+#            |___/                        
+#
+# http://www.patorjk.com/software/taag/#p=display&f=Standard&t=organizr
+  mediaBox_organizr:
+    container_name: mediaBox_organizr
+    hostname: mediaBox_organizr
+    image: organizr/organizr
+    restart: unless-stopped
+    environment:
+      - PUID=${pid}
+      - PGID=${gid}
+      - TZ=${tz}
+      - fpm=true
+      - branch=v2-master
+    ports:
+      - 8080:80
+    volumes:
+      - ${mediaBox_config}/organizr:/config
+
+#        _           
+#  _ __ | | _____  __
+# | '_ \| |/ _ \ \/ /
+# | |_) | |  __/>  < 
+# | .__/|_|\___/_/\_\
+# |_|                
+#
+# http://www.patorjk.com/software/taag/#p=display&f=Standard&t=plex
+  mediaBox_plex:
+    container_name: mediaBox_plex
+    hostname: mediaBox_plex
+    image: plexinc/pms-docker
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - PUID=${pid}
+      - PGID=${gid}
+      - TZ=${tz}
+      - PLEX_UID=${pid}
+      - PLEX_GID=${gid}
+    volumes:
+      - ${mediaBox_config}/plex:/config
+      - ${mediaBox_media}:/media_library
+      - ${mediaBox_downloads}/transcode:/transcode
+
+#                _                 
+#  _ __ __ _  __| | __ _ _ __ _ __ 
+# | '__/ _` |/ _` |/ _` | '__| '__|
+# | | | (_| | (_| | (_| | |  | |   
+# |_|  \__,_|\__,_|\__,_|_|  |_|   
+#
+#
+# http://www.patorjk.com/software/taag/#p=display&f=Standard&t=radarr                                  
+  mediaBox_radarr:
+    container_name: mediaBox_radarr
+    hostname: mediaBox_radarr
+    restart: unless-stopped
+    image: linuxserver/radarr
+    environment:
+      - PUID=${pid}
+      - PGID=${gid}
+      - TZ=${tz}
+    ports:
+      - 7878:7878
+    volumes:
+      - ${mediaBox_config}/radarr:/config
+      - ${mediaBox_media}:/media_library
+      - ${mediaBox_downloads}:/downloads
+
+#
+#  _ __ _____   _____ _ __ ___  ___ 
+# | '__/ _ \ \ / / _ \ '__/ __|/ _ \
+# | | |  __/\ V /  __/ |  \__ \  __/
+# |_|  \___| \_/ \___|_|  |___/\___|
+#
+#                                   
+# http://www.patorjk.com/software/taag/#p=display&f=Standard&t=reverse
+  mediaBox_reverse:
+    container_name: mediaBox_reverse
+    hostname: mediaBox_reverse
+    image: nginx:latest
+    restart: unless-stopped
+    volumes:
+      - ${mediaBox_config}/reverse:/etc/nginx
+    ports:
+      - 80:80
+      - 443:443
+
+#                                  
+#  ___  ___  _ __   __ _ _ __ _ __ 
+# / __|/ _ \| '_ \ / _` | '__| '__|
+# \__ \ (_) | | | | (_| | |  | |   
+# |___/\___/|_| |_|\__,_|_|  |_|   
+#
+#
+# http://www.patorjk.com/software/taag/#p=display&f=Standard&t=sonarr                                  
+  mediaBox_sonarr:
+    container_name: mediaBox_sonarr
+    hostname: mediaBox_sonarr
+    restart: unless-stopped
+    image: linuxserver/sonarr
+    environment:
+      - PUID=${pid}
+      - PGID=${gid}
+      - TZ=${tz}
+    ports:
+      - 8989:8989
+    volumes:
+      - ${mediaBox_config}/sonarr:/config
+      - ${mediaBox_media}:/media_library
+
+#  _              _         _ _ _ 
+# | |_ __ _ _   _| |_ _   _| | (_)
+# | __/ _` | | | | __| | | | | | |
+# | || (_| | |_| | |_| |_| | | | |
+#  \__\__,_|\__,_|\__|\__,_|_|_|_|
+#
+#
+# http://www.patorjk.com/software/taag/#p=display&f=Standard&t=tautulli                                 
+  mediaBox_tautulli:
+    container_name: mediaBox_tautulli
+    hostname: mediaBox_tautulli
+    image: linuxserver/tautulli
+    restart: unless-stopped
+    environment:
+      - PUID=${pid}
+      - GUID=${gid}
+      - TZ=${tz}
+    ports:
+      - 8181:8181
+    volumes:
+      - ${mediaBox_config}/tautulli:/config
+      - ${mediaBox_config}/tautulli/logs:/logs:ro
+
+#  _                                 _         _             
+# | |_ _ __ __ _ _ __  ___ _ __ ___ (_)___ ___(_) ___  _ __  
+# | __| '__/ _` | '_ \/ __| '_ ` _ \| / __/ __| |/ _ \| '_ \ 
+# | |_| | | (_| | | | \__ \ | | | | | \__ \__ \ | (_) | | | |
+#  \__|_|  \__,_|_| |_|___/_| |_| |_|_|___/___/_|\___/|_| |_|
+#
+#
+# http://www.patorjk.com/software/taag/#p=display&f=Standard&t=transmission                                                            
+  mediaBox_transmission:
+    container_name: mediaBox_transmission
+    hostname: mediaBox_transmission
+    image: ghcr.io/linuxserver/transmission
+    restart: unless-stopped
+    environment:
+      - PUID=${pid}
+      - GUID=${gid}
+      - TZ=${tz}
+      - TRANSMISSION_WEB_HOME=/combustion-release/
+    volumes:
+      - ${mediaBox_config}/transmission:/config
+      - ${mediaBox_downloads}:/downloads
+      - ${mediaBox_downloads}/torrent_files:/watch
+    ports:
+      - 9090:9091
+      - 51413:51413
+      
+#                _       _     _                         
+# __      ____ _| |_ ___| |__ | |_ _____      _____ _ __ 
+# \ \ /\ / / _` | __/ __| '_ \| __/ _ \ \ /\ / / _ \ '__|
+#  \ V  V / (_| | || (__| | | | || (_) \ V  V /  __/ |   
+#   \_/\_/ \__,_|\__\___|_| |_|\__\___/ \_/\_/ \___|_|   
+#
+#
+# http://www.patorjk.com/software/taag/#p=display&f=Standard&t=watchtower                                                            
+  mediaBox_watchtower:
+    container_name: mediaBox_watchtower
+    hostname: mediaBox_watchtower
+    restart: always
+    image: v2tec/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+      
